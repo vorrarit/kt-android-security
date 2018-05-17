@@ -1,0 +1,19 @@
+version: '3.2'
+services:
+  redis:
+    image: redis:3.0
+    ports:
+      - "6379"
+
+  php:
+    image: vorrarit/php:7.1-apache-mysql-ssl-redis
+    volumes:
+      - C:/Users/mid/Documents/jobs/BitFactory/kt-android-security/php/www:/var/www/html
+    environment:
+      - REDIS_SAVE_PATH=tcp://redis:6379
+      - XDEBUG_REMOTE_HOST=10.255.41.140
+    ports:
+      - 8080:80
+      - 8443:443
+    depends_on:
+      - redis
