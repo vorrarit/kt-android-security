@@ -5,12 +5,36 @@ import android.net.http.SslError
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.example.mid.testwebview.php.PhpServerService
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        @JvmStatic lateinit var TAG:String
+    }
+
+    init {
+        TAG = MainActivity::class.toString()
+    }
 
     lateinit var webView:WebView;
 
@@ -41,6 +65,61 @@ class MainActivity : AppCompatActivity() {
                 handler?.proceed()
             }
         }
-        webView.loadUrl("http://local.minerta.io:4222")
+        webView.loadUrl("https://192.168.99.100:8443/phpinfo.php")
+
+        val trustAllCerts = arrayOf<TrustManager>(object: X509TrustManager {
+            @Throws(CertificateException::class)
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+
+            }
+
+            @Throws(CertificateException::class)
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+
+            }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> {
+                return arrayOf()
+            }
+        })
+
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+        val sslSocketFactory = sslContext.socketFactory
+        val builder = OkHttpClient.Builder()
+                .sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+                .hostnameVerifier { _, _ -> true }
+
+
+        val retrofit = Retrofit.Builder()
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl("https://192.168.99.100:8443/")
+                .client(builder.build())
+                .build()
+        val phpServerService = retrofit.create(PhpServerService::class.java)
+        phpServerService.callApi()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({
+                    hmacData -> Log.d(TAG, hmacData.hmacValue)
+                }, { error ->
+                    error.printStackTrace()
+                })
+
+        Log.d(TAG, hmacSha256("Hello, World", "0011223344"))
+    }
+
+    @Throws(Exception::class)
+    fun hmacSha256(str:String, secret:String): String {
+        val secretKey = SecretKeySpec(secret.toByteArray(), "HmacSHA256")
+
+        val hmacSha256 = Mac.getInstance("HmacSHA256")
+        hmacSha256.init(secretKey)
+
+        return Base64.encodeToString(
+                hmacSha256.doFinal(str.toByteArray()),
+                Base64.DEFAULT
+        )
     }
 }
