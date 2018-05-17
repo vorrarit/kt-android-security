@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <debug-overrides>
+        <base-config cleartextTrafficPermitted="false" >
+            <trust-anchors>
+                <certificates src="@raw/ssl_cert_snakeoil"/>
+            </trust-anchors>
+        </base-config>
+    </debug-overrides>
+</network-security-config>
