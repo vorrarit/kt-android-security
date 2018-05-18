@@ -7,4 +7,14 @@
             </trust-anchors>
         </base-config>
     </debug-overrides>
+    <domain-config hstsEnforced="true" cleartextTrafficPermitted="false" >
+        <domain includeSubdomains="false">dev.bitfactory.co.th</domain>
+        <pin-set>
+            <!--<pin digest="SHA-256">o9kfqLV9ipmVipvkpya/D6xlL5UlhRK6uTcu09n1UOI=</pin>-->
+
+            <!-- google.com -->
+            <pin digest="SHA-256">47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=</pin>
+            <pin digest="SHA-256">f8NnEFZxQ4ExFOhSN7EiFWtiudZQVD2oY60uauV/n78=</pin>
+        </pin-set>
+    </domain-config>
 </network-security-config>

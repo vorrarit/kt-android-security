@@ -19,9 +19,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "serverUrl", serverUrl
+            buildConfigField "String", "pinningAlias", pinningAlias
+            buildConfigField "String", "pinningSha256", pinningSha256
         }
         debug {
             buildConfigField "String", "serverUrl", serverUrl
+            buildConfigField "String", "pinningAlias", pinningAlias
+            buildConfigField "String", "pinningSha256", pinningSha256
         }
     }
 }

@@ -8,7 +8,7 @@ services:
   php:
     image: vorrarit/php:7.1-apache-mysql-ssl-redis
     volumes:
-      - d:/Users/mid/Documents/jobs/BitFactory/kt-android-security/php/www:/var/www/html
+      - /home/mid/Documents/jobs/BitFactory/kt-android-security/php/www:/var/www/html
     environment:
       - REDIS_SAVE_PATH=tcp://redis:6379
       - XDEBUG_REMOTE_HOST=10.255.41.140
